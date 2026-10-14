@@ -1,0 +1,231 @@
+#DATAFRAME
+
+```{r}
+### Creating a data frame using the `data.frame()` function. Here we
+### create a data frame with three columns named id, value, and type.
+a <- data.frame(
+  id = 1:5,
+  value = rnorm(5),
+  type = sample(LETTERS[1:2], size = 5, replace = TRUE)
+)
+a
+typeof(a)
+class(a)
+attributes(a)
+
+### We can also create data frames by converting appropriate lists.
+b <- list(
+  id = 1:5,
+  value = rnorm(5),
+  type = sample(LETTERS[1:2], size = 5, replace = TRUE)
+)
+b
+b <- as.data.frame(b)
+b
+
+### Data frames can also be created by manually adding attributes
+### to a list that meets the constraints for data frames.
+b <- list(
+  id = 1:5,
+  value = rnorm(5),
+  type = sample(LETTERS[1:2], size = 5, replace = TRUE)
+)
+class(b) <- "data.frame"
+rownames(b) <- 1:5
+b
+class(b)
+
+### Data frames are naturally created by importing data.  Here we
+### import a dataset containing offers for used cars.
+a <- read.csv(file = "../../sgh-r-basic-data/cars.csv", header = TRUE)
+typeof(a)
+class(a)
+
+### For large data frames, printing them in their entirety is not
+### particularly convenient. We have simple functions that provide an
+### aggregate structure of the data frame
+dim(a) # dimensions of the data frame
+str(a) # more detailed structure of the data frame
+
+### We can also look at the first few or the last few observations.
+### If the number of columns exceeds the allowed width, the output
+### will be wrapped onto several lines.
+head(a)
+tail(a)
+```
+
+```{r}
+### Example of two data frames and column-wise joining.
+a <- data.frame(
+  id = 1:5,
+  values = rnorm(5)
+)
+b <- data.frame(
+  class = sample(LETTERS[1:2], size = 5, replace = TRUE)
+)
+
+cbind(a, b)
+
+### Example of two data frames and row binding.
+a <- data.frame(
+  id = 1:5,
+  values = rnorm(5),
+  class = sample(LETTERS[1:2], size = 5, replace = TRUE)
+)
+b <- data.frame(
+  id = 6:10,
+  values = rnorm(5),
+  class = sample(LETTERS[1:2], size = 5, replace = TRUE)
+)
+
+rbind(a, b)
+```
+
+#SUBSETTING
+
+##Vectoer Subsetting
+
+```{r}
+### The basic method of indexing is to provide a vector of
+### positions. Remember that even a single number is already a vector.
+x <- 5:1 # creating a sample vector
+x
+
+x[1] # first element; indexing starts from 1, not 0
+x[5] # fifth element
+x[c(1, 3, 5)] # first, third, and fifth element
+x[c(1, 1, 5, 5)] # repeatedly occurring elements
+x[1:3] # the position vector is generated
+x[3:5] # the position vector is generated
+x[5:3] # the position vector is generated
+x[length(x)] # always the last element of the vector
+x[-1] # creating a new vector by removing an element
+x[-5] # creating a new vector by removing an element
+x[-(2:4)] # creating a new vector by removing multiple elements
+x[1] <- 123 # changing the value of a vector at a given position
+x[1:3] <- 5:7 # changing the value of a vector at multiple positions
+x[1:3] <- 0 # using the recycling rule to change the values of multiple items
+
+
+### Vectors can be indexed by logical vectors, which are usually the
+### result of computations. A logical vector is typically the same
+### length as the vector being indexed. If the value at position i is
+### TRUE, that position is included in the result. If the value at
+### position i is FALSE, that position is not included in the result.
+y <- round(rnorm(20), 2) # Creating a sample vector
+y
+
+y[y < 0] # selecting all negative values
+y[y > 0] # selecting all positive values
+y[(y > 0) & (y < 1)] # selecting all values between 0 and 1
+y[(y < -1) | (y > 1)] # selecting values either less than -1 or greater than 1
+y[!(y < 0)] # selecting non-negative values
+
+### Indices do not have to be created based on the vector to which
+### they are applied. Below, based on the yTypes vector, which gives
+### the types of observations in the y vector, we select only the
+### observations for a single type.
+yTypes <- sample(LETTERS[1:2], size = length(y), replace = TRUE)
+yTypes
+
+idx <- yTypes == "A"
+idx
+y[idx]
+
+### Vectors can also be indexed by specifying a name. Of course, for
+### this to be possible, the vector must have keys. This method is
+### very rarely used.
+x <- c(pierwsza = 4, druga = 3, trzecia = 1)
+x
+
+x["pierwsza"] # a single string is a vector
+x[c("pierwsza", "trzecia")] # selecting multiple values
+```
+
+```{r}
+### Creating data for plotting a function
+n <- 3 * 10^2 # number of points
+x <- seq(-2 * pi, 2 * pi, length.out = n) # x-values grid
+y <- sin(x^2)/x + x # calculation of y value
+
+### Indexing
+idx <- y > 0
+
+### Chart
+plot(x, y, col = "white") # creating an "empty" plot
+abline(h = 0, col = "gray") # overlaying the horizontal axis
+abline(v = 0, col = "gray") # overlaying the vertical axis
+abline(a = 0, b = 1, lty = "dashed", col = "blue") # adding a slanted asymptote
+points(x[idx], y[idx], col = "blue", pch = 20, cex = 0.7) # points corresponding to positive values
+points(x[!idx], y[!idx], col = "red", pch = 20, cex = 0.7) # points corresponding to negative values
+```
+
+```{r}
+### Creating a sample
+n <- 3 * 10^3 # sample size
+x <- rnorm(n) # x coordinates
+y <- rnorm(n) # y coordinates
+
+### Index
+idx <- x * y > 0
+idxDisk <- x^2 + y^2 <= 1/2
+
+### Creating a plot
+plot(x, y, col = "white", asp = 1)
+abline(h = 0, col = "gray")
+abline(v = 0, col = "gray")
+points(x[idx & idxDisk], y[idx & idxDisk], pch = 20, col = "steelblue3")
+points(x[!idx & idxDisk], y[!idx & idxDisk], pch = 20, col = "orange3")
+points(x[idx & !idxDisk], y[idx & !idxDisk], pch = 20, col = "steelblue1")
+points(x[!idx & !idxDisk], y[!idx & !idxDisk], pch = 20, col = "orange1")
+```
+
+##Matrix Subsetting
+
+```{r}
+### Creating an example matrix
+a <- matrix(round(rnorm(5 * 6), 2), 5, 6)
+a
+
+### Indexing by specifying position
+a[1, 1]
+a[2, 3]
+a[c(1, 3), c(2, 3)]
+a[1:2, 2:3]
+a[1:2, ] # all columns
+a[, 2:3] # all rows
+
+### Indexing by specifying logical vectors 
+a[a[,1] > 0, ] # all rows where the first column has a positive value
+a[, a[2, ] > 0] # all columns where the second row has a positive value
+a[a[,1] > 0, a[2, ] > 0] # all rows where the first
+                         # column has a positive value and all
+                         # columns where the second row has
+                         # a positive value
+
+### Indexing by specifying label
+colnames(a) <- LETTERS[1:(dim(a)[2])]
+rownames(a) <- letters[1:(dim(a)[1])]
+a
+
+a["a", "A"]
+a[c("a", "c"), c("A", "D", "F")]
+
+### Mixed indexing, different types in different dimensions.
+a[c("a", "c"), 2:3]
+a[a[,4] < 0, 2:3]
+a[1:3, a[2, ] > 0]
+
+### If after indexing we are left with a matrix that has only
+### one row or only one column, the dim attribute is automatically "lost"
+### which causes automatic conversion to
+### a vector. We can prevent this by using the argument drop =
+### FALSE.
+a
+a[, 2]
+a[, 2, drop = FALSE]
+```
+
+
+
+
